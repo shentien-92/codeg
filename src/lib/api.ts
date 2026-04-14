@@ -427,6 +427,16 @@ export async function updateSystemLanguageSettings(
   return getTransport().call("update_system_language_settings", { settings })
 }
 
+// --- Global Shortcut ---
+
+export async function getGlobalShortcut(): Promise<string> {
+  return getTransport().call("get_global_shortcut")
+}
+
+export async function updateGlobalShortcut(shortcut: string): Promise<string> {
+  return getTransport().call("update_global_shortcut", { shortcut })
+}
+
 // --- Version Control ---
 
 export async function detectGit(): Promise<GitDetectResult> {

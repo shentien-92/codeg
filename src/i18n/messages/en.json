@@ -258,6 +258,8 @@
   },
   "ShortcutSettings": {
     "sectionTitle": "Shortcuts",
+    "globalSectionTitle": "Global Shortcuts",
+    "globalDescription": "Global shortcuts work even when the application is not focused. Press the shortcut to quickly show or hide the entire application.",
     "resetDefault": "Reset defaults",
     "recordInstruction": "Click the right-side button, then press a key combination. Use Ctrl/Cmd, Alt, and Shift. Press Esc to cancel recording.",
     "recording": "Press shortcut...",
@@ -319,6 +321,10 @@
       "newline_in_message": {
         "title": "Newline in Message",
         "description": "Insert a newline in the message input box"
+      },
+      "toggle_app": {
+        "title": "Toggle App Visibility",
+        "description": "Show or hide the entire application from anywhere"
       }
     }
   },

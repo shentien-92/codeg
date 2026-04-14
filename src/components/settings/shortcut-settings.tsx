@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Keyboard, RotateCcw } from "lucide-react"
+import { Globe, Keyboard, RotateCcw } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { useIsMac } from "@/hooks/use-is-mac"
@@ -14,6 +14,8 @@ import {
   formatShortcutLabel,
   shortcutFromKeyboardEvent,
 } from "@/lib/keyboard-shortcuts"
+import { getGlobalShortcut, updateGlobalShortcut } from "@/lib/api"
+import { detectEnvironment } from "@/lib/transport/detect"
 import { Button } from "@/components/ui/button"
 
 const SHARED_SHORTCUT_PAIRS: Array<[ShortcutActionId, ShortcutActionId]> = [
@@ -28,12 +30,101 @@ function canShareShortcut(a: ShortcutActionId, b: ShortcutActionId): boolean {
   )
 }
 
+function GlobalShortcutSection() {
+  const t = useTranslations("ShortcutSettings")
+  const isMac = useIsMac()
+  const [globalShortcut, setGlobalShortcut] = useState<string | null>(null)
+  const [recording, setRecording] = useState(false)
+
+  useEffect(() => {
+    getGlobalShortcut()
+      .then(setGlobalShortcut)
+      .catch(() => {
+        /* ignore – not available in web mode */
+      })
+  }, [])
+
+  useEffect(() => {
+    if (!recording) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.repeat) return
+      event.preventDefault()
+      event.stopPropagation()
+
+      if (event.key === "Escape") {
+        setRecording(false)
+        return
+      }
+
+      const shortcut = shortcutFromKeyboardEvent(event)
+      if (!shortcut) return
+
+      updateGlobalShortcut(shortcut)
+        .then((saved) => {
+          setGlobalShortcut(saved)
+          toast.success(t("toasts.updated"))
+        })
+        .catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : t("toasts.invalid")
+          toast.error(msg)
+        })
+
+      setRecording(false)
+    }
+
+    window.addEventListener("keydown", onKeyDown, true)
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, true)
+    }
+  }, [recording, t])
+
+  if (globalShortcut === null) return null
+
+  return (
+    <section className="rounded-xl border bg-card p-4 space-y-4">
+      <div className="flex items-center gap-2">
+        <Globe className="h-4 w-4 text-muted-foreground" />
+        <h2 className="text-sm font-semibold">{t("globalSectionTitle")}</h2>
+      </div>
+
+      <p className="text-xs text-muted-foreground leading-5">
+        {t("globalDescription")}
+      </p>
+
+      <div className="space-y-2">
+        <div className="rounded-lg border px-3 py-2 flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <div className="text-sm font-medium">
+              {t("actions.toggle_app.title")}
+            </div>
+            <p className="text-xs text-muted-foreground truncate">
+              {t("actions.toggle_app.description")}
+            </p>
+          </div>
+          <Button
+            variant={recording ? "default" : "secondary"}
+            size="sm"
+            className="font-mono min-w-36 justify-center"
+            onClick={() => setRecording((prev) => !prev)}
+          >
+            {recording
+              ? t("recording")
+              : formatShortcutLabel(globalShortcut, isMac)}
+          </Button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export function ShortcutSettings() {
   const t = useTranslations("ShortcutSettings")
   const { shortcuts, updateShortcut, resetShortcuts } = useShortcutSettings()
   const isMac = useIsMac()
   const [recordingAction, setRecordingAction] =
     useState<ShortcutActionId | null>(null)
+  const isTauri = detectEnvironment() === "tauri"
   const actionTitle = useCallback(
     (id: ShortcutActionId) => t(`actions.${id}.title`),
     [t]
@@ -100,6 +191,8 @@ export function ShortcutSettings() {
   return (
     <div className="h-full overflow-auto">
       <div className="w-full space-y-4">
+        {isTauri && <GlobalShortcutSection />}
+
         <section className="rounded-xl border bg-card p-4 space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
