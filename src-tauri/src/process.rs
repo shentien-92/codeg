@@ -288,10 +288,30 @@ fn find_node_bin_dir(home: &std::path::Path) -> Option<PathBuf> {
                         })
                         .map(|e| e.path().join("bin"))
                         .collect();
-                    // Sort so that unversioned "node" comes first, then
-                    // versioned entries in descending order.
-                    node_opts.sort();
-                    node_opts.reverse();
+                    // Sort: unversioned "node" first (highest priority),
+                    // then versioned entries like "node@22" in descending
+                    // order so the newest version is tried first.
+                    node_opts.sort_by(|a, b| {
+                        let a_name = a.parent().and_then(|p| p.file_name())
+                            .unwrap_or_default().to_string_lossy().to_string();
+                        let b_name = b.parent().and_then(|p| p.file_name())
+                            .unwrap_or_default().to_string_lossy().to_string();
+                        // Unversioned "node" sorts before everything.
+                        match (a_name.as_str(), b_name.as_str()) {
+                            ("node", "node") => std::cmp::Ordering::Equal,
+                            ("node", _) => std::cmp::Ordering::Less,
+                            (_, "node") => std::cmp::Ordering::Greater,
+                            _ => {
+                                // Extract version numbers after "node@" and
+                                // compare numerically in descending order.
+                                let a_ver: u32 = a_name.strip_prefix("node@")
+                                    .and_then(|v| v.parse().ok()).unwrap_or(0);
+                                let b_ver: u32 = b_name.strip_prefix("node@")
+                                    .and_then(|v| v.parse().ok()).unwrap_or(0);
+                                b_ver.cmp(&a_ver)
+                            }
+                        }
+                    });
                     candidates.extend(node_opts);
                 }
             }
