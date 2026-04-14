@@ -44,6 +44,7 @@ mod tauri_app {
         if let Err(err) = fix_path_env::fix() {
             eprintln!("[PATH] fix_path_env failed: {err}");
         }
+        process::ensure_homebrew_in_path();
         process::ensure_node_in_path();
         process::ensure_user_npm_prefix_in_path();
 

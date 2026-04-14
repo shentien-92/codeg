@@ -119,12 +119,63 @@ where
     command
 }
 
-/// If `node` is not already in PATH, detect common Node.js version manager
-/// installations (nvm, fnm, volta) and prepend the best matching bin directory
-/// to the process PATH so that **all** downstream code (`which`, `Command`,
-/// child processes) can find node/npm/npx without any special handling.
+/// Detect Homebrew installation on macOS and ensure its `bin/` and `sbin/`
+/// directories are in PATH.
 ///
-/// Call once at startup, after `fix_path_env::fix()`.
+/// On macOS, GUI-launched applications (Finder, Spotlight, Dock) inherit a
+/// minimal PATH that typically does **not** include Homebrew's directories.
+/// This means `which::which("node")`, `which::which("opencode")`, etc. will
+/// fail even though the user has these tools installed via `brew install`.
+///
+/// Standard Homebrew prefixes:
+/// - Apple Silicon: `/opt/homebrew`
+/// - Intel:         `/usr/local`
+///
+/// If `HOMEBREW_PREFIX` is set it is used instead of the well-known defaults.
+/// The function is a no-op on non-macOS platforms.
+pub fn ensure_homebrew_in_path() {
+    #[cfg(target_os = "macos")]
+    {
+        let current_path = std::env::var_os("PATH").unwrap_or_default();
+        let current_str = current_path.to_string_lossy();
+
+        // Collect Homebrew prefixes to check.
+        let mut prefixes: Vec<PathBuf> = Vec::new();
+
+        if let Ok(env_prefix) = std::env::var("HOMEBREW_PREFIX") {
+            prefixes.push(PathBuf::from(env_prefix));
+        }
+
+        // Well-known default prefixes (Apple Silicon first, then Intel).
+        prefixes.push(PathBuf::from("/opt/homebrew"));
+        prefixes.push(PathBuf::from("/usr/local"));
+
+        for prefix in prefixes {
+            for subdir in &["bin", "sbin"] {
+                let dir = prefix.join(subdir);
+                if dir.is_dir() {
+                    let dir_str = dir.to_string_lossy();
+                    let sep = ":";
+                    // Skip if already in PATH.
+                    if current_str.split(sep).any(|p| p == dir_str.as_ref()) {
+                        continue;
+                    }
+                    prepend_to_path(&dir);
+                    eprintln!("[PATH] Homebrew: prepended {}", dir.display());
+                }
+            }
+        }
+    }
+}
+
+/// If `node` is not already in PATH, detect common Node.js version manager
+/// installations (nvm, fnm, volta) and Homebrew, then prepend the best
+/// matching bin directory to the process PATH so that **all** downstream
+/// code (`which`, `Command`, child processes) can find node/npm/npx without
+/// any special handling.
+///
+/// Call once at startup, after `fix_path_env::fix()` and
+/// `ensure_homebrew_in_path()`.
 #[cfg(feature = "tauri-runtime")]
 pub fn ensure_node_in_path() {
     // Already reachable — nothing to do.
@@ -143,8 +194,8 @@ pub fn ensure_node_in_path() {
     }
 }
 
-/// Search common Node.js version manager directories for a `node` binary and
-/// return the containing bin directory.
+/// Search common Node.js version manager directories and Homebrew for a
+/// `node` binary and return the containing bin directory.
 #[cfg(feature = "tauri-runtime")]
 fn find_node_bin_dir(home: &std::path::Path) -> Option<PathBuf> {
     let mut candidates: Vec<PathBuf> = Vec::new();
@@ -207,6 +258,51 @@ fn find_node_bin_dir(home: &std::path::Path) -> Option<PathBuf> {
     let volta_bin = volta_home.join("bin");
     if volta_bin.is_dir() {
         candidates.push(volta_bin);
+    }
+
+    // ── Homebrew (macOS) ─────────────────────────────────────────────────
+    // Homebrew-installed Node.js lives under <prefix>/opt/node@<ver>/bin
+    // or <prefix>/bin (symlinked). Check the opt-linked paths first for a
+    // more specific match, then fall back to the main bin directory.
+    #[cfg(target_os = "macos")]
+    {
+        let brew_prefixes: Vec<PathBuf> = std::env::var("HOMEBREW_PREFIX")
+            .map(|p| vec![PathBuf::from(p)])
+            .unwrap_or_else(|_| {
+                vec![
+                    PathBuf::from("/opt/homebrew"),
+                    PathBuf::from("/usr/local"),
+                ]
+            });
+
+        for prefix in &brew_prefixes {
+            // Check versioned opt links (e.g. /opt/homebrew/opt/node@22/bin)
+            let opt_dir = prefix.join("opt");
+            if opt_dir.is_dir() {
+                if let Ok(entries) = std::fs::read_dir(&opt_dir) {
+                    let mut node_opts: Vec<PathBuf> = entries
+                        .flatten()
+                        .filter(|e| {
+                            let name = e.file_name().to_string_lossy().to_string();
+                            name == "node" || name.starts_with("node@")
+                        })
+                        .map(|e| e.path().join("bin"))
+                        .collect();
+                    // Sort so that unversioned "node" comes first, then
+                    // versioned entries in descending order.
+                    node_opts.sort();
+                    node_opts.reverse();
+                    candidates.extend(node_opts);
+                }
+            }
+
+            // Fall back to the main Homebrew bin directory where `node`
+            // may be symlinked.
+            let bin_dir = prefix.join("bin");
+            if bin_dir.is_dir() {
+                candidates.push(bin_dir);
+            }
+        }
     }
 
     // Return the first candidate that actually contains a `node` binary.
