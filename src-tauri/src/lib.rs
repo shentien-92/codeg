@@ -21,9 +21,9 @@ mod tauri_app {
     use crate::chat_channel::manager::ChatChannelManager;
     use crate::commands::{
         acp as acp_commands, chat_channel as chat_channel_commands, conversations,
-        experts as experts_commands, folder_commands, folders, mcp as mcp_commands,
-        model_provider as model_provider_commands, notification, project_boot, system_settings,
-        terminal as terminal_commands, version_control, windows,
+        experts as experts_commands, folder_commands, folders, global_shortcut,
+        mcp as mcp_commands, model_provider as model_provider_commands, notification,
+        project_boot, system_settings, terminal as terminal_commands, version_control, windows,
     };
     use crate::terminal::manager::TerminalManager;
     use crate::{db, network, process, web};
@@ -54,6 +54,7 @@ mod tauri_app {
             .plugin(tauri_plugin_updater::Builder::new().build())
             .plugin(tauri_plugin_process::init())
             .plugin(tauri_plugin_notification::init())
+            .plugin(tauri_plugin_global_shortcut::Builder::new().build())
             .manage(ConnectionManager::new())
             .manage(TerminalManager::new())
             .manage(ChatChannelManager::new())
@@ -86,6 +87,11 @@ mod tauri_app {
                 // Load saved appearance settings before any window is created.
                 tauri::async_runtime::block_on(windows::load_saved_zoom(&db.conn));
                 tauri::async_runtime::block_on(windows::load_saved_appearance_mode(&db.conn));
+
+                // Register global shortcut for toggling app visibility.
+                tauri::async_runtime::block_on(
+                    global_shortcut::load_and_register_global_shortcut(app.handle(), &db.conn),
+                );
 
                 // Install bundled expert skills into the central store
                 // (`~/.codeg/skills/`). Runs in the background and does
@@ -437,6 +443,8 @@ mod tauri_app {
                 model_provider_commands::create_model_provider,
                 model_provider_commands::update_model_provider,
                 model_provider_commands::delete_model_provider,
+                global_shortcut::get_global_shortcut,
+                global_shortcut::update_global_shortcut,
                 web::start_web_server,
                 web::stop_web_server,
                 web::get_web_server_status,

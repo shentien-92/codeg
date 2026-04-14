@@ -27,6 +27,7 @@ tauri-runtime = [
     "dep:tauri-plugin-updater",
     "dep:tauri-plugin-process",
     "dep:tauri-plugin-notification",
+    "dep:tauri-plugin-global-shortcut",
     "dep:keyring",
 ]
 
@@ -92,6 +93,7 @@ tauri-plugin-window-state = { version = "2", optional = true }
 tauri-plugin-updater = { version = "2", optional = true }
 tauri-plugin-process = { version = "2", optional = true }
 tauri-plugin-notification = { version = "2", optional = true }
+tauri-plugin-global-shortcut = { version = "2", optional = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 mac-notification-sys = "0.6"

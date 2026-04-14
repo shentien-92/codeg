@@ -11,6 +11,8 @@ pub mod system_settings;
 pub mod terminal;
 pub mod version_control;
 #[cfg(feature = "tauri-runtime")]
+pub mod global_shortcut;
+#[cfg(feature = "tauri-runtime")]
 pub mod notification;
 #[cfg(feature = "tauri-runtime")]
 pub mod windows;
