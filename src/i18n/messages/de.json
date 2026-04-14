@@ -258,6 +258,8 @@
   },
   "ShortcutSettings": {
     "sectionTitle": "Kurzbefehle",
+    "globalSectionTitle": "Globale Tastenkürzel",
+    "globalDescription": "Globale Tastenkürzel funktionieren auch wenn die Anwendung nicht fokussiert ist. Drücken Sie das Kürzel, um die gesamte Anwendung schnell ein- oder auszublenden.",
     "resetDefault": "Standardwerte zurücksetzen",
     "recordInstruction": "Klicke auf die rechte Schaltfläche und drücke dann eine Tastenkombination. Verwende Ctrl/Cmd, Alt und Shift. Drücke Esc, um die Aufzeichnung abzubrechen.",
     "recording": "Kurzbefehl drücken...",
@@ -319,6 +321,10 @@
       "newline_in_message": {
         "title": "Zeilenumbruch einfügen",
         "description": "Einen Zeilenumbruch im Eingabefeld einfügen"
+      },
+      "toggle_app": {
+        "title": "App-Sichtbarkeit umschalten",
+        "description": "Die gesamte Anwendung von überall schnell ein- oder ausblenden"
       }
     }
   },

@@ -258,6 +258,8 @@
   },
   "ShortcutSettings": {
     "sectionTitle": "ショートカット",
+    "globalSectionTitle": "グローバルショートカット",
+    "globalDescription": "グローバルショートカットはアプリケーションにフォーカスがない場合でも動作します。ショートカットを押すとアプリ全体をすばやく表示・非表示できます。",
     "resetDefault": "デフォルトに戻す",
     "recordInstruction": "右側のボタンをクリックしてからキーの組み合わせを押してください。Ctrl/Cmd、Alt、Shift が使用できます。Esc で記録をキャンセルします。",
     "recording": "ショートカットを入力...",
@@ -319,6 +321,10 @@
       "newline_in_message": {
         "title": "メッセージ内で改行",
         "description": "入力欄で改行を挿入する"
+      },
+      "toggle_app": {
+        "title": "アプリの表示切替",
+        "description": "どこからでもアプリ全体をすばやく表示・非表示する"
       }
     }
   },

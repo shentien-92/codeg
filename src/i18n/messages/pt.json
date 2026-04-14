@@ -258,6 +258,8 @@
   },
   "ShortcutSettings": {
     "sectionTitle": "Atalhos",
+    "globalSectionTitle": "Atalhos globais",
+    "globalDescription": "Os atalhos globais funcionam mesmo quando a aplicação não está em foco. Pressione o atalho para mostrar ou ocultar rapidamente toda a aplicação.",
     "resetDefault": "Restaurar padrões",
     "recordInstruction": "Clique no botão à direita e pressione uma combinação de teclas. Use Ctrl/Cmd, Alt e Shift. Pressione Esc para cancelar a gravação.",
     "recording": "Pressione um atalho...",
@@ -319,6 +321,10 @@
       "newline_in_message": {
         "title": "Nova linha na mensagem",
         "description": "Inserir uma nova linha na caixa de entrada"
+      },
+      "toggle_app": {
+        "title": "Alternar visibilidade do app",
+        "description": "Mostrar ou ocultar rapidamente toda a aplicação de qualquer lugar"
       }
     }
   },

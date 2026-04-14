@@ -258,6 +258,8 @@
   },
   "ShortcutSettings": {
     "sectionTitle": "Atajos",
+    "globalSectionTitle": "Atajos globales",
+    "globalDescription": "Los atajos globales funcionan incluso cuando la aplicación no está enfocada. Presione el atajo para mostrar u ocultar rápidamente toda la aplicación.",
     "resetDefault": "Restablecer valores predeterminados",
     "recordInstruction": "Haz clic en el botón derecho y luego pulsa una combinación de teclas. Usa Ctrl/Cmd, Alt y Shift. Pulsa Esc para cancelar la grabación.",
     "recording": "Pulsa un atajo...",
@@ -319,6 +321,10 @@
       "newline_in_message": {
         "title": "Nueva línea en mensaje",
         "description": "Insertar una nueva línea en el cuadro de entrada"
+      },
+      "toggle_app": {
+        "title": "Alternar visibilidad de la app",
+        "description": "Mostrar u ocultar rápidamente toda la aplicación desde cualquier lugar"
       }
     }
   },

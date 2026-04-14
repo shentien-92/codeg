@@ -258,6 +258,8 @@
   },
   "ShortcutSettings": {
     "sectionTitle": "Raccourcis",
+    "globalSectionTitle": "Raccourcis globaux",
+    "globalDescription": "Les raccourcis globaux fonctionnent même lorsque l'application n'est pas au premier plan. Appuyez sur le raccourci pour afficher ou masquer rapidement l'application.",
     "resetDefault": "Rétablir les valeurs par défaut",
     "recordInstruction": "Cliquez sur le bouton à droite, puis appuyez sur une combinaison de touches. Utilisez Ctrl/Cmd, Alt et Shift. Appuyez sur Échap pour annuler l’enregistrement.",
     "recording": "Appuyez sur un raccourci...",
@@ -319,6 +321,10 @@
       "newline_in_message": {
         "title": "Retour à la ligne",
         "description": "Insérer un retour à la ligne dans la zone de saisie"
+      },
+      "toggle_app": {
+        "title": "Basculer la visibilité de l'app",
+        "description": "Afficher ou masquer rapidement l'application depuis n'importe où"
       }
     }
   },

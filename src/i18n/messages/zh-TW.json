@@ -258,6 +258,8 @@
   },
   "ShortcutSettings": {
     "sectionTitle": "快捷鍵",
+    "globalSectionTitle": "全域快捷鍵",
+    "globalDescription": "全域快捷鍵即使在應用程式未聚焦時也能生效。按下該快捷鍵可以快速呼出或隱藏整個應用。",
     "resetDefault": "恢復預設",
     "recordInstruction": "點擊右側按鈕後按下組合鍵即可修改。建議使用 Ctrl/Cmd、Alt、Shift 的組合。按 Esc 可取消錄製。",
     "recording": "按下快捷鍵...",
@@ -319,6 +321,10 @@
       "newline_in_message": {
         "title": "訊息換行",
         "description": "在輸入框中插入換行符"
+      },
+      "toggle_app": {
+        "title": "切換應用可見性",
+        "description": "在任何地方快速呼出或隱藏整個應用"
       }
     }
   },
