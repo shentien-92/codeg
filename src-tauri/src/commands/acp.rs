@@ -2479,10 +2479,18 @@ fn sync_local_config_env(agent_type: AgentType, new_env: &BTreeMap<String, Strin
 
     // Read existing on-disk config.
     let existing = if path.exists() {
-        fs::read_to_string(&path)
-            .ok()
-            .and_then(|raw| serde_json::from_str::<serde_json::Value>(&raw).ok())
-            .filter(|v| v.is_object())
+        match fs::read_to_string(&path) {
+            Ok(raw) => serde_json::from_str::<serde_json::Value>(&raw)
+                .ok()
+                .filter(|v| v.is_object()),
+            Err(e) => {
+                eprintln!(
+                    "[ACP] sync_local_config_env: failed to read {}: {e}",
+                    path.display()
+                );
+                None
+            }
+        }
     } else {
         None
     };
@@ -2515,9 +2523,12 @@ fn sync_local_config_env(agent_type: AgentType, new_env: &BTreeMap<String, Strin
     }
 
     let patch = serde_json::json!({ "env": env_patch });
-    // Best-effort: reuse persist_agent_local_config_json for the merge.
     let patch_str = serde_json::to_string(&patch).unwrap_or_default();
-    let _ = persist_agent_local_config_json(agent_type, Some(&patch_str));
+    if let Err(e) = persist_agent_local_config_json(agent_type, Some(&patch_str)) {
+        eprintln!(
+            "[ACP] sync_local_config_env: failed to persist env patch for {agent_type}: {e}"
+        );
+    }
 }
 
 #[cfg(feature = "tauri-runtime")]
