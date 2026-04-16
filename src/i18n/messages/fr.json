@@ -494,6 +494,7 @@
     "emptyNoAgent": "Aucun agent disponible.",
     "configManagement": "Gestion de configuration",
     "envVars": "Variables d'environnement",
+    "envVarsFromConfigHint": "Les variables d'environnement suivantes proviennent du fichier de configuration JSON natif et doivent être modifiées là-bas : {keys}",
     "nativeJsonConfig": "Configuration JSON native",
     "modelHintDefault": "Laissez vide pour utiliser le modèle système par défaut.",
     "generalConfigDescriptionClaude": "Prend en charge la configuration rapide de l'API URL, API Key et des modèles Claude, et synchronise avec la configuration JSON native.",

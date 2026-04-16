@@ -494,6 +494,7 @@
     "emptyNoAgent": "Keine verfügbaren Agenten.",
     "configManagement": "Konfigurationsverwaltung",
     "envVars": "Umgebungsvariablen",
+    "envVarsFromConfigHint": "Die folgenden Umgebungsvariablen stammen aus der nativen JSON-Konfigurationsdatei und müssen dort bearbeitet werden: {keys}",
     "nativeJsonConfig": "Natives JSON-Config",
     "modelHintDefault": "Leer lassen, um das System-Standardmodell zu verwenden.",
     "generalConfigDescriptionClaude": "Unterstützt schnelle Konfiguration von API-URL, API-Key und Claude-Modellen und synchronisiert mit der nativen JSON-Konfiguration.",

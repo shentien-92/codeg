@@ -494,6 +494,7 @@
     "emptyNoAgent": "لا يوجد وكيل متاح.",
     "configManagement": "إدارة الإعدادات",
     "envVars": "متغيرات البيئة",
+    "envVarsFromConfigHint": "متغيرات البيئة التالية مصدرها ملف إعداد JSON الأصلي ويجب تعديلها هناك: {keys}",
     "nativeJsonConfig": "إعداد JSON أصلي",
     "modelHintDefault": "اتركه فارغًا لاستخدام النموذج الافتراضي للنظام.",
     "generalConfigDescriptionClaude": "يدعم الإعداد السريع لـ API URL وAPI Key ونماذج Claude، ويتزامن مع إعداد JSON الأصلي.",

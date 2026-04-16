@@ -494,6 +494,7 @@
     "emptyNoAgent": "暂无可用 Agent。",
     "configManagement": "配置管理",
     "envVars": "环境变量",
+    "envVarsFromConfigHint": "以下环境变量来自原生 JSON 配置文件，需在该配置中编辑：{keys}",
     "nativeJsonConfig": "原生 JSON 配置",
     "modelHintDefault": "留空则使用系统默认模型。",
     "generalConfigDescriptionClaude": "支持 API URL、API Key 与 Claude 模型快捷配置，并与原生 JSON 配置联动。",

@@ -494,6 +494,7 @@
     "emptyNoAgent": "사용 가능한 에이전트가 없습니다.",
     "configManagement": "구성 관리",
     "envVars": "환경 변수",
+    "envVarsFromConfigHint": "다음 환경 변수는 네이티브 JSON 구성 파일에서 가져온 것이며 해당 구성에서 편집해야 합니다: {keys}",
     "nativeJsonConfig": "네이티브 JSON 구성",
     "modelHintDefault": "비워두면 시스템 기본 모델을 사용합니다.",
     "generalConfigDescriptionClaude": "API URL, API Key, Claude 모델을 빠르게 설정하고 네이티브 JSON 구성과 동기화합니다.",

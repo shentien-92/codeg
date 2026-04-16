@@ -225,6 +225,30 @@ function parseEnvText(envText: string): Record<string, string> {
   return map
 }
 
+/**
+ * Extract env var key names that originate from the agent's local config
+ * file (e.g. `~/.claude/settings.json` → `env` object).  These env vars
+ * are read-only in the env textarea — users must edit the config file
+ * (or the Native JSON Config section) to change / remove them.
+ */
+function extractLocalConfigEnvKeys(configJson: string | null): string[] {
+  if (!configJson) return []
+  try {
+    const parsed = JSON.parse(configJson)
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      const env = parsed.env
+      if (env && typeof env === "object" && !Array.isArray(env)) {
+        return Object.keys(env).filter(
+          (key) => typeof env[key] === "string" && env[key].trim() !== ""
+        )
+      }
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return []
+}
+
 function patchEnvText(
   envText: string,
   patch: Record<string, string | undefined>
@@ -3431,6 +3455,16 @@ export function AcpAgentSettings() {
     : false
   const selectedAgentKind = selectedAgent?.agent_type ?? null
 
+  // Env keys that originate from the agent's local config file (e.g.
+  // ~/.claude/settings.json → env).  These are merged into the env
+  // textarea but cannot be deleted from here.
+  const localConfigEnvKeys = useMemo(() => {
+    if (!selectedAgent) return []
+    const uses = ["claude_code", "gemini", "open_claw"]
+    if (!uses.includes(selectedAgent.agent_type)) return []
+    return extractLocalConfigEnvKeys(selectedAgent.config_json)
+  }, [selectedAgent])
+
   const selectedModelProviders = useMemo(() => {
     if (!selectedAgent) return []
     return modelProviders.filter((p) =>
@@ -5341,6 +5375,13 @@ export function AcpAgentSettings() {
                     />
                     <div className="pointer-events-none absolute inset-0 rounded-md bg-background/10 backdrop-blur-[3px] transition-opacity duration-200 group-focus-within:opacity-0" />
                   </div>
+                  {localConfigEnvKeys.length > 0 && (
+                    <p className="text-[11px] text-muted-foreground">
+                      {t("envVarsFromConfigHint", {
+                        keys: localConfigEnvKeys.join(", "),
+                      })}
+                    </p>
+                  )}
                   <div className="flex justify-end">
                     <Button
                       size="sm"

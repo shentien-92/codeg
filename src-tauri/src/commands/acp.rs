@@ -2440,12 +2440,6 @@ pub(crate) async fn acp_update_agent_env_core(
         .await
         .map_err(|e| AcpError::protocol(e.to_string()))?;
 
-    // For agents whose local config file has an "env" section (Claude Code,
-    // Gemini, OpenClaw), we must sync the on-disk file so that env keys
-    // removed in the UI are actually deleted from the file.  Otherwise the
-    // next load merges them back in and they appear "undeletable".
-    sync_local_config_env(agent_type, &env);
-
     let patch = agent_setting_service::AgentSettingsUpdate {
         enabled,
         env_json: serialize_env_map(&env)?,
@@ -2457,78 +2451,6 @@ pub(crate) async fn acp_update_agent_env_core(
 
     emit_acp_agents_updated(emitter, "env_updated", Some(agent_type));
     Ok(())
-}
-
-/// Synchronise the `"env"` object inside an agent's local config file with the
-/// authoritative env map from the UI.  Keys present on disk but absent from
-/// `new_env` are set to `null` so that `merge_json_values` will remove them.
-/// Keys present in `new_env` overwrite the on-disk values.
-fn sync_local_config_env(agent_type: AgentType, new_env: &BTreeMap<String, String>) {
-    // Only agents whose local config is read-merged need this treatment.
-    let uses_merge = matches!(
-        agent_type,
-        AgentType::ClaudeCode | AgentType::Gemini | AgentType::OpenClaw
-    );
-    if !uses_merge {
-        return;
-    }
-
-    let Some(path) = agent_local_config_path(agent_type) else {
-        return;
-    };
-
-    // Read existing on-disk config.
-    let existing = if path.exists() {
-        match fs::read_to_string(&path) {
-            Ok(raw) => serde_json::from_str::<serde_json::Value>(&raw)
-                .ok()
-                .filter(|v| v.is_object()),
-            Err(e) => {
-                eprintln!(
-                    "[ACP] sync_local_config_env: failed to read {}: {e}",
-                    path.display()
-                );
-                None
-            }
-        }
-    } else {
-        None
-    };
-
-    let Some(existing) = existing else {
-        return;
-    };
-
-    // Extract the current on-disk "env" keys.
-    let on_disk_env = match existing.get("env").and_then(|v| v.as_object()) {
-        Some(obj) => obj,
-        None => return, // nothing on disk to clean up
-    };
-
-    // Build a patch object: keep keys that are in new_env (with updated
-    // values), and null-out keys that have been removed.
-    let mut env_patch = serde_json::Map::new();
-    let mut needs_patch = false;
-    for key in on_disk_env.keys() {
-        if let Some(value) = new_env.get(key) {
-            env_patch.insert(key.clone(), serde_json::Value::String(value.clone()));
-        } else {
-            env_patch.insert(key.clone(), serde_json::Value::Null);
-            needs_patch = true;
-        }
-    }
-
-    if !needs_patch {
-        return;
-    }
-
-    let patch = serde_json::json!({ "env": env_patch });
-    let patch_str = serde_json::to_string(&patch).unwrap_or_default();
-    if let Err(e) = persist_agent_local_config_json(agent_type, Some(&patch_str)) {
-        eprintln!(
-            "[ACP] sync_local_config_env: failed to persist env patch for {agent_type}: {e}"
-        );
-    }
 }
 
 #[cfg(feature = "tauri-runtime")]
